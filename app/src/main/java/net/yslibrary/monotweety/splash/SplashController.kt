@@ -4,12 +4,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import net.yslibrary.monotweety.R
 import net.yslibrary.monotweety.analytics.Analytics
 import net.yslibrary.monotweety.base.ActionBarController
 import net.yslibrary.monotweety.base.HasComponent
+import net.yslibrary.monotweety.base.RefWatcherDelegate
 import net.yslibrary.monotweety.login.LoginController
 import net.yslibrary.monotweety.login.LoginTransitionChangeHandlerCompat
 import net.yslibrary.monotweety.setting.SettingController
@@ -31,6 +34,9 @@ class SplashController : ActionBarController(), HasComponent<SplashComponent> {
 
   @set:[Inject]
   var viewModel by Delegates.notNull<SplashViewModel>()
+
+  @set:[Inject]
+  var refWatcherDelegate by Delegates.notNull<RefWatcherDelegate>()
 
   var subscriptions: CompositeSubscription = CompositeSubscription()
 
@@ -75,5 +81,15 @@ class SplashController : ActionBarController(), HasComponent<SplashComponent> {
   override fun onDestroyView(view: View) {
     super.onDestroyView(view)
     subscriptions.unsubscribe()
+  }
+
+  override fun onChangeEnded(changeHandler: ControllerChangeHandler, changeType: ControllerChangeType) {
+    super.onChangeEnded(changeHandler, changeType)
+    refWatcherDelegate.handleOnChangeEnded(isDestroyed, changeType)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    refWatcherDelegate.handleOnDestroy()
   }
 }

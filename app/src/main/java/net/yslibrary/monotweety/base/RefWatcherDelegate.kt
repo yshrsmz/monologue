@@ -2,34 +2,28 @@ package net.yslibrary.monotweety.base
 
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.squareup.leakcanary.RefWatcher
+import javax.inject.Inject
 
 interface RefWatcherDelegate {
-  fun takeRefWatcher(refWatcher: RefWatcher?)
-  fun onDestroy()
-  fun onChangeEnded(isDestroyed: Boolean, changeType: ControllerChangeType)
+  fun handleOnDestroy()
+  fun handleOnChangeEnded(isDestroyed: Boolean, changeType: ControllerChangeType)
 }
 
-class RefWatcherDelegateImpl() : RefWatcherDelegate {
+class RefWatcherDelegateImpl @Inject constructor(val refWatcher: RefWatcher) : RefWatcherDelegate {
 
   private var hasExisted: Boolean = false
 
-  private var refWatcher: RefWatcher? = null
-
-  override fun takeRefWatcher(refWatcher: RefWatcher?) {
-    this.refWatcher = refWatcher
-  }
-
-  override fun onDestroy() {
+  override fun handleOnDestroy() {
     if (hasExisted) {
-      refWatcher?.watch(this)
+      refWatcher.watch(this)
     }
   }
 
-  override fun onChangeEnded(isDestroyed: Boolean, changeType: ControllerChangeType) {
+  override fun handleOnChangeEnded(isDestroyed: Boolean, changeType: ControllerChangeType) {
 
     hasExisted = !changeType.isEnter
     if (isDestroyed) {
-      refWatcher?.watch(this)
+      refWatcher.watch(this)
     }
   }
 }

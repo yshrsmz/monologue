@@ -9,15 +9,14 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.view.*
 import android.widget.FrameLayout
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.twitter.sdk.android.core.models.Tweet
 import net.yslibrary.monotweety.R
 import net.yslibrary.monotweety.analytics.Analytics
-import net.yslibrary.monotweety.base.ActionBarController
-import net.yslibrary.monotweety.base.HasComponent
-import net.yslibrary.monotweety.base.ProgressController
-import net.yslibrary.monotweety.base.findById
+import net.yslibrary.monotweety.base.*
 import net.yslibrary.monotweety.status.adapter.ComposeStatusAdapter
 import net.yslibrary.monotweety.status.adapter.EditorAdapterDelegate
 import rx.Observable
@@ -33,6 +32,7 @@ import kotlin.properties.Delegates
  */
 class ComposeStatusController(private var status: String? = null) : ActionBarController(),
                                                                     HasComponent<ComposeStatusComponent> {
+
   override val hasBackButton: Boolean = true
   override val hasOptionsMenu: Boolean = true
 
@@ -61,6 +61,9 @@ class ComposeStatusController(private var status: String? = null) : ActionBarCon
 
   @set:[Inject]
   var viewModel by Delegates.notNull<ComposeStatusViewModel>()
+
+  @set:[Inject]
+  var refWatcherDelegate by Delegates.notNull<RefWatcherDelegate>()
 
   val sendButtonClicks = PublishSubject<Unit>()
 
@@ -217,9 +220,15 @@ class ComposeStatusController(private var status: String? = null) : ActionBarCon
     return true
   }
 
+  override fun onChangeEnded(changeHandler: ControllerChangeHandler, changeType: ControllerChangeType) {
+    super.onChangeEnded(changeHandler, changeType)
+    refWatcherDelegate.handleOnChangeEnded(isDestroyed, changeType)
+  }
+
   override fun onDestroy() {
     super.onDestroy()
     viewModel.onDestroy()
+    refWatcherDelegate.handleOnDestroy()
   }
 
   fun showConfirmCloseDialog() {

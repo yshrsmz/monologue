@@ -8,6 +8,8 @@ import android.support.v7.widget.SwitchCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import com.jakewharton.rxbinding.widget.checkedChanges
@@ -17,6 +19,7 @@ import net.yslibrary.monotweety.R
 import net.yslibrary.monotweety.analytics.Analytics
 import net.yslibrary.monotweety.base.ActionBarController
 import net.yslibrary.monotweety.base.HasComponent
+import net.yslibrary.monotweety.base.RefWatcherDelegate
 import net.yslibrary.monotweety.base.findById
 import net.yslibrary.monotweety.changelog.ChangelogController
 import net.yslibrary.monotweety.data.appinfo.AppInfo
@@ -38,6 +41,9 @@ class SettingController : ActionBarController(), HasComponent<SettingComponent> 
 
   @set:[Inject]
   var viewModel by Delegates.notNull<SettingViewModel>()
+
+  @set:[Inject]
+  var refWatcherDelegate by Delegates.notNull<RefWatcherDelegate>()
 
   lateinit var bindings: Bindings
 
@@ -253,6 +259,16 @@ class SettingController : ActionBarController(), HasComponent<SettingComponent> 
     router.pushController(RouterTransaction.with(ChangelogController())
         .pushChangeHandler(HorizontalChangeHandler())
         .popChangeHandler(HorizontalChangeHandler()))
+  }
+
+  override fun onChangeEnded(changeHandler: ControllerChangeHandler, changeType: ControllerChangeType) {
+    super.onChangeEnded(changeHandler, changeType)
+    refWatcherDelegate.handleOnChangeEnded(isDestroyed, changeType)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    refWatcherDelegate.handleOnDestroy()
   }
 
   inner class Bindings(view: View) {

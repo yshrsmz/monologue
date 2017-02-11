@@ -3,6 +3,8 @@ package net.yslibrary.monotweety.login
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import com.twitter.sdk.android.core.Callback
@@ -14,6 +16,7 @@ import net.yslibrary.monotweety.R
 import net.yslibrary.monotweety.analytics.Analytics
 import net.yslibrary.monotweety.base.ActionBarController
 import net.yslibrary.monotweety.base.HasComponent
+import net.yslibrary.monotweety.base.RefWatcherDelegate
 import net.yslibrary.monotweety.base.findById
 import net.yslibrary.monotweety.event.ActivityResult
 import net.yslibrary.monotweety.setting.SettingController
@@ -33,6 +36,9 @@ class LoginController : ActionBarController(), HasComponent<LoginComponent> {
 
   @set:[Inject]
   var viewModel by Delegates.notNull<LoginViewModel>()
+
+  @set:[Inject]
+  var refWatcherDelegate by Delegates.notNull<RefWatcherDelegate>()
 
   override val component: LoginComponent by lazy {
     Timber.i("create LoginComponent")
@@ -94,6 +100,16 @@ class LoginController : ActionBarController(), HasComponent<LoginComponent> {
         viewModel.onLoginFailed(exception)
       }
     }
+  }
+
+  override fun onChangeEnded(changeHandler: ControllerChangeHandler, changeType: ControllerChangeType) {
+    super.onChangeEnded(changeHandler, changeType)
+    refWatcherDelegate.handleOnChangeEnded(isDestroyed, changeType)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    refWatcherDelegate.handleOnDestroy()
   }
 
   inner class Bindings(view: View) {

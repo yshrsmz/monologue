@@ -5,10 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.bluelinelabs.conductor.ControllerChangeHandler
-import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.rxlifecycle.RxController
-import com.squareup.leakcanary.RefWatcher
 import net.yslibrary.monotweety.analytics.Analytics
 import net.yslibrary.monotweety.base.di.Names
 import net.yslibrary.rxeventbus.EventBus
@@ -22,8 +19,7 @@ import kotlin.properties.Delegates
 /**
  * Created by yshrsmz on 2016/09/24.
  */
-abstract class BaseController() : RxController(),
-                                  RefWatcherDelegate by RefWatcherDelegateImpl() {
+abstract class BaseController() : RxController() {
 
   @set:Inject
   @setparam:Named(Names.FOR_ACTIVITY)
@@ -31,9 +27,6 @@ abstract class BaseController() : RxController(),
 
   @set:Inject
   var analytics by Delegates.notNull<Analytics>()
-
-  @set:[Inject]
-  var refWatcher: RefWatcher? = null
 
   private var created: Boolean = false
 
@@ -46,7 +39,6 @@ abstract class BaseController() : RxController(),
     if (!created) {
       created = true
       onCreate()
-      takeRefWatcher(refWatcher)
     }
 
     return inflateView(inflater, container)
@@ -57,11 +49,6 @@ abstract class BaseController() : RxController(),
   }
 
   abstract fun inflateView(inflater: LayoutInflater, container: ViewGroup): View
-
-  override fun onChangeEnded(changeHandler: ControllerChangeHandler, changeType: ControllerChangeType) {
-    super.onChangeEnded(changeHandler, changeType)
-    onChangeEnded(isDestroyed, changeType)
-  }
 
   fun <T> Observable<T>.bindToLifecycle(): Observable<T> = this.compose(this@BaseController.bindToLifecycle<T>())
 
