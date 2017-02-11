@@ -12,6 +12,8 @@ import dagger.Module
 import dagger.Provides
 import net.yslibrary.monotweety.base.Clock
 import net.yslibrary.monotweety.base.ClockImpl
+import net.yslibrary.monotweety.base.RefWatcherDelegate
+import net.yslibrary.monotweety.base.RefWatcherDelegateImpl
 import net.yslibrary.monotweety.base.di.AppScope
 import net.yslibrary.monotweety.base.di.Names
 import rx.lang.kotlin.PublishSubject
@@ -77,11 +79,16 @@ open class AppModule(private val context: Context) {
     return PublishSubject()
   }
 
+  @Provides
+  fun provideRefWatcherDelegate(refWatcherDelegateImpl: RefWatcherDelegateImpl): RefWatcherDelegate {
+    return refWatcherDelegateImpl
+  }
+
   interface Provider {
     fun notificationManager(): NotificationManagerCompat
     fun clock(): Clock
     fun config(): Config
-    fun refWatcher(): RefWatcher
+    fun refWatcherDelegate(): RefWatcherDelegate
     @Named(Names.FOR_LOGIN)
     fun loginCompletedSubject(): PublishSubject<TwitterSession>
   }

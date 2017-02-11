@@ -1,9 +1,9 @@
 package net.yslibrary.monotweety
 
-import com.squareup.leakcanary.RefWatcher
 import com.twitter.sdk.android.core.TwitterSession
 import dagger.Component
 import net.yslibrary.monotweety.analytics.Analytics
+import net.yslibrary.monotweety.base.RefWatcherDelegate
 import net.yslibrary.monotweety.base.di.AppScope
 import net.yslibrary.monotweety.base.di.Names
 import net.yslibrary.monotweety.data.DataModule
@@ -32,7 +32,7 @@ interface AppComponent : UserComponent.ComponentProvider {
 
   fun footerStateManager(): FooterStateManager
 
-  fun refWatcher(): RefWatcher
+  fun refWatcherDelegate(): RefWatcherDelegate
 
   fun analytics(): Analytics
 
